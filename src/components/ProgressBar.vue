@@ -6,7 +6,7 @@
       </div>
     </div>
     <input type="number" v-model.number="value">
-    <p class="error">{{ error }}</p>
+    <p class="error"><span>{{ error }}</span></p>
   </div>
 </template>
 
@@ -18,8 +18,8 @@ export default {
       percent: 0,
       degree: 0,
       error: null,
-      percentInterval: null,
-      degreeInterval: null
+      percentIntervalId: null,
+      degreeIntervalId: null
     }
   },
   watch: {
@@ -32,16 +32,20 @@ export default {
 
       this.error = null
 
-      if (this.percentInterval) {
-        clearInterval(this.percentInterval)
-        this.percentInterval = null
+      if (this.percentIntervalId) {
+        clearInterval(this.percentIntervalId)
+        this.percentIntervalId = null
       }
-      if (this.degreeInterval) {
-        clearInterval(this.degreeInterval)
-        this.degreeInterval = null
+      if (this.degreeIntervalId) {
+        clearInterval(this.degreeIntervalId)
+        this.degreeIntervalId = null
       }
 
-      this.percentInterval = setInterval(() => {
+      const intervalForPercent = 1000 / 100
+      const intervalForDegree = 1000 / 360
+      // I use these intervals to make the percentage and degree complete a full turn simultaneously in one second.
+
+      this.percentIntervalId = setInterval(() => {
         if (this.percent === Math.round(this.value * 100)) {
           return
         } else if (this.percent < Math.round(this.value * 100)) {
@@ -49,9 +53,9 @@ export default {
         } else {
           this.percent--
         }
-      }, 10)
+      }, intervalForPercent)
 
-      this.degreeInterval = setInterval(() => {
+      this.degreeIntervalId = setInterval(() => {
         if (this.degree === Math.round(this.value * 360)) {
           return
         } else if (this.degree < Math.round(this.value * 360)) {
@@ -59,7 +63,7 @@ export default {
         } else {
           this.degree--
         }
-      }, 2.7)
+      }, intervalForDegree)
     }
   }
 }
@@ -106,9 +110,19 @@ input {
   color: #231540;
 }
 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 .error {
   color: red;
   padding: 20px;
-  font-size: 20px;
+  font-size: 18px;
+  height: 32px;
 }
 </style>
