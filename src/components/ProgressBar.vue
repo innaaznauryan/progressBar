@@ -5,55 +5,62 @@
         <div class="indicator">{{ percent }}%</div>
       </div>
     </div>
-    <BaseInput v-model="value"/>
+    <input type="number" v-model.number="value">
+    <p class="error">{{ error }}</p>
   </div>
 </template>
 
 <script>
-import BaseInput from "./BaseInput.vue"
-
 export default {
   data() {
     return {
       value: 0,
       percent: 0,
-      degree: 0
+      degree: 0,
+      error: null,
+      percentInterval: null,
+      degreeInterval: null
     }
   },
   watch: {
-    value() {
-      this.percent = 0
-      this.degree = 0
-      let percentInterval = null
-      let degreeInterval = null
-      clearInterval(percentInterval)
-      clearInterval(degreeInterval)
-
-      if(!percentInterval) {
-        percentInterval = setInterval(() => {
-          if (this.percent < Math.round(this.value * 100)) {
-            this.percent++
-          } else {
-            clearInterval(percentInterval)
-            percentInterval = null
-          }
-        }, 10)
+    value: function () {
+      if (this.value < 0 || this.value > 1 || this.value === null) {
+        this.error = "Please enter a number between 0 and 1"
+        this.value = null
+        return
       }
 
-      if(!degreeInterval) {
-        degreeInterval = setInterval(() => {
-          if (this.degree < this.value * 360) {
-            this.degree++
-          } else {
-            clearInterval(degreeInterval)
-            degreeInterval = null
-          }
-        }, 2.7)
+      this.error = null
+
+      if (this.percentInterval) {
+        clearInterval(this.percentInterval)
+        this.percentInterval = null
       }
+      if (this.degreeInterval) {
+        clearInterval(this.degreeInterval)
+        this.degreeInterval = null
+      }
+
+      this.percentInterval = setInterval(() => {
+        if (this.percent === Math.round(this.value * 100)) {
+          return
+        } else if (this.percent < Math.round(this.value * 100)) {
+          this.percent++
+        } else {
+          this.percent--
+        }
+      }, 10)
+
+      this.degreeInterval = setInterval(() => {
+        if (this.degree === Math.round(this.value * 360)) {
+          return
+        } else if (this.degree < Math.round(this.value * 360)) {
+          this.degree++
+        } else {
+          this.degree--
+        }
+      }, 2.7)
     }
-  },
-  components: {
-    BaseInput
   }
 }
 </script>
@@ -86,5 +93,22 @@ export default {
 .indicator {
   color: #EBE424;
   font-size: 32px;
+}
+
+input {
+  padding: 5px;
+  border: 1px solid;
+  outline: 0;
+  border-radius: 5px;
+  font-size: 18px;
+  text-align: center;
+  width: 100px;
+  color: #231540;
+}
+
+.error {
+  color: red;
+  padding: 20px;
+  font-size: 20px;
 }
 </style>

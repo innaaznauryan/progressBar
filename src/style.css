@@ -6,4 +6,9 @@
 
 body {
     background-color: #231540;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
 }
