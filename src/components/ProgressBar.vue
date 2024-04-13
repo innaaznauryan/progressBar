@@ -1,11 +1,11 @@
 <template>
   <div class="container">
-    <div class="progress" :style="{background: `conic-gradient(#EBE424 ${degree}deg, #4F4466 0deg`}">
+    <div class="progress" :style="{ background: `conic-gradient(#EBE424 ${degree}deg, #4F4466 0deg` }">
       <div class="inner">
         <div class="indicator">{{ percent }}%</div>
       </div>
     </div>
-    <input type="number" v-model.number="value">
+    <input type="number" v-model.number="input">
     <p class="error"><span>{{ error }}</span></p>
   </div>
 </template>
@@ -14,56 +14,36 @@
 export default {
   data() {
     return {
-      value: 0,
+      input: 0,
       percent: 0,
       degree: 0,
       error: null,
-      percentIntervalId: null,
-      degreeIntervalId: null
     }
   },
   watch: {
-    value: function () {
-      if (this.value < 0 || this.value > 1 || this.value === null) {
+    input: function () {
+      if (this.input < 0 || this.input > 1 || this.input === null) {
         this.error = "Please enter a number between 0 and 1"
-        this.value = null
+        this.input = null
         return
       }
-
       this.error = null
 
-      if (this.percentIntervalId) {
-        clearInterval(this.percentIntervalId)
-        this.percentIntervalId = null
-      }
-      if (this.degreeIntervalId) {
-        clearInterval(this.degreeIntervalId)
-        this.degreeIntervalId = null
-      }
+      const zero = document.timeline.currentTime
 
-      const intervalForPercent = 1000 / 100
-      const intervalForDegree = 1000 / 360
-      // I use these intervals to make the percentage and degree complete a full turn simultaneously in one second.
-
-      this.percentIntervalId = setInterval(() => {
-        if (this.percent === Math.round(this.value * 100)) {
-          return
-        } else if (this.percent < Math.round(this.value * 100)) {
-          this.percent++
+      const animate = (timeStamp) => {
+        const elapsed = (timeStamp - zero) / 1000
+        if (elapsed < 1) {
+          this.percent = Math.round(elapsed * this.input * 100)
+          this.degree = Math.round(elapsed * this.input * 360)
+          requestAnimationFrame(animate)
         } else {
-          this.percent--
+          this.percent = Math.round(this.input * 100)
+          this.degree = Math.round(this.input * 360)
         }
-      }, intervalForPercent)
+      }
 
-      this.degreeIntervalId = setInterval(() => {
-        if (this.degree === Math.round(this.value * 360)) {
-          return
-        } else if (this.degree < Math.round(this.value * 360)) {
-          this.degree++
-        } else {
-          this.degree--
-        }
-      }, intervalForDegree)
+      requestAnimationFrame(animate)
     }
   }
 }
